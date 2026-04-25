@@ -10,11 +10,11 @@ phases:
 
   build:
     commands:
-      - echo "Preparing deployment"
+      - echo "Starting deployment"
+
       - echo "$EC2_KEY" > key.pem
       - chmod 400 key.pem
 
-      - echo "Deploying to EC2"
       - ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@13.233.215.215 "
           cd /home/ec2-user/node-app &&
           git pull origin main &&
