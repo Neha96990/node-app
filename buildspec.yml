@@ -19,7 +19,7 @@ phases:
           cd /home/ec2-user/node-app &&
           git pull origin main &&
           npm install &&
-          pkill node || true &&
+          sudo pkill node || true
           nohup node app.js > output.log 2>&1 &
         "
 
