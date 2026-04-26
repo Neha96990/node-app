@@ -16,16 +16,16 @@ phases:
     commands:
       - echo "Deploying to EC2"
       - |
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@<EC2-PUBLIC-IP> << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@3.6.36.97 << 'EOF'
         cd ~/app || mkdir ~/app && cd ~/app
         rm -rf *
         exit
         EOF
 
-      - scp -o StrictHostKeyChecking=no -i key.pem -r * ec2-user@<EC2-PUBLIC-IP>:~/app/
+      - scp -o StrictHostKeyChecking=no -i key.pem -r * ec2-user@3.6.36.97:~/app/
 
       - |
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@<EC2-PUBLIC-IP> << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@3.6.36.97 << 'EOF'
         cd ~/app
         npm install
         nohup node app.js > output.log 2>&1 &
