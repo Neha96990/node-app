@@ -1,27 +1,27 @@
-version: 0.2
+post_build:
+  commands:
+    - echo "Deploying..."
 
-phases:
-  install:
-    commands:
-      - npm install
+    # Get key
+    - aws ssm get-parameter --name "/deploy/key" --with-decryption --query Parameter.Value --output text > key.pem
+    - chmod 400 key.pem
 
-  post_build:
-    commands:
-      - echo "Deploying..."
+    # Create folder on EC2 first
+    - |
+      ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@3.6.36.97 << 'EOF'
+      mkdir -p ~/app
+      exit
+      EOF
 
-      # Get key from Parameter Store
-      - aws ssm get-parameter --name "/deploy/key" --with-decryption --query Parameter.Value --output text > key.pem
+    # Copy only required files (not *)
+    - scp -o StrictHostKeyChecking=no -i key.pem app.js package.json ec2-user@3.6.36.97:~/app/
 
-      # Fix permission
-      - chmod 400 key.pem
-
-      # Copy files
-      - scp -o StrictHostKeyChecking=no -i key.pem -r * ec2-user@3.6.36.97:~/app/
-
-      # Run app
-      - |
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@3.6.36.97 << 'EOF'
-        cd ~/app
-        npm install
-        nohup node app.js > output.log 2>&1 &
-        EOF
+    # Run app
+    - |
+      ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@3.6.36.97 << 'EOF'
+      cd ~/app
+      npm install
+      pkill node || true
+      nohup node app.js > output.log 2>&1 &
+      exit
+      EOF
