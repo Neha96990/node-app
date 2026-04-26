@@ -12,4 +12,24 @@ phases:
 
   post_build:
     commands:
-      - echo "Build completed"
+      - echo "Deploying to EC2"
+
+      - aws ssm get-parameter --name "/deploy/key" --with-decryption --query Parameter.Value --output text > key.pem
+      - chmod 400 key.pem
+
+      - |
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@3.6.36.97
+        cd ~/app || mkdir ~/app && cd ~/app
+        rm -rf *
+        exit
+        EOF
+
+      - scp -o StrictHostKeyChecking=no -i key.pem -r * ec2-user@:~/app/
+
+      - |
+        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@3.6.36.97 << 'EOF'
+        cd ~/app
+        npm install
+        nohup node app.js > output.log 2>&1 &
+        exit
+        EOF
